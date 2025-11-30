@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>示範頁面 — 登入與資訊卡</title>
+  <style>
+    /* Reset */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+      background: #fafafa;
+      color: #222;
+    }
+
+    /* Layout */
+    .container {
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start; /* card 會偏上一些 */
+      gap: 40px;
+      padding: 40px;
+    }
+
+    /* 左側表單 */
+    .login-wrap {
+      width: 240px;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: inline-block;
+      width: 56px;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: calc(100% - 64px);
+      padding: 6px 8px;
+      border: 1px solid #cfcfcf;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    button[type="submit"] {
+      margin-top: 8px;
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: 1px solid #777;
+      background: #fff;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button[type="submit"]:hover { box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+    /* 右側浮動卡片位置（如圖偏右且有陰影圓角） */
+    .card-container {
+      flex: 1;
+      display: flex;
+      justify-content: center; /* card 在右側中間靠上，可調整 */
+      align-items: flex-start;
+      position: relative;
+      min-height: 180px;
+    }
+
+    .info-card {
+      width: 320px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 22px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+      border: 1px solid rgba(0,0,0,0.04);
+      transform: translateY(0);
+      transition: transform 220ms ease, opacity 220ms ease;
+      opacity: 1;
+    }
+
+    .info-card.hidden {
+      transform: translateY(-8px) scale(0.98);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .card-title {
+      font-weight: 800;
+      font-size: 18px;
+      margin-bottom: 14px;
+      color: #111;
+    }
+
+    .card-body {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 16px;
+    }
+
+    .card-body .label {
+      display: inline-block;
+      min-width: 64px;
+      color: #666;
+    }
+
+    .confirm-btn {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #999;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    /* 微調：讓 form 在左上，card 置中稍右 */
+    .container { align-items: flex-start; }
+
+    /* 小螢幕排版 */
+    @media (max-width: 720px) {
+      .container { flex-direction: column; gap: 20px; padding: 20px; }
+      .card-container { justify-content: flex-start; }
+      .info-card { width: 100%; }
+      label { display:block; width:100%; margin-bottom:6px; }
+      input[type="text"], input[type="password"] { width:100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 左側登入 -->
+    <div class="login-wrap" aria-label="登入區">
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="account">帳號：</label>
+          <input id="account" name="account" type="text" placeholder="輸入帳號" value="123" />
+        </div>
+        <div class="form-group">
+          <label for="password">密碼：</label>
+          <input id="password" name="password" type="password" placeholder="••••••" value="abc" />
+        </div>
+        <div class="form-group">
+          <button type="submit">送出</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 右側卡片 -->
+    <div class="card-container">
+      <aside class="info-card hidden" id="infoCard" role="dialog" aria-labelledby="cardTitle" aria-hidden="true">
+        <div class="card-title" id="cardTitle">台中科技大學-資管一A!</div>
+        <div class="card-body">
+          <div><span class="label">帳號：</span><span id="cardAccount">—</span></div>
+        </div>
+        <div>
+          <button class="confirm-btn" id="closeCard">確定</button>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const infoCard = document.getElementById('infoCard');
+    const cardAccount = document.getElementById('cardAccount');
+    const closeBtn = document.getElementById('closeCard');
+
+    // 顯示卡片（填入帳號）
+    function showCard(account) {
+      cardAccount.textContent = account || '—';
+      infoCard.classList.remove('hidden');
+      infoCard.setAttribute('aria-hidden', 'false');
+    }
+
+    // 隱藏卡片
+    function hideCard() {
+      infoCard.classList.add('hidden');
+      infoCard.setAttribute('aria-hidden', 'true');
+    }
+
+    // 表單送出處理
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const account = form.account.value.trim();
+      // 可以在此加入驗證或密碼檢查
+      showCard(account || '未輸入帳號');
+    });
+
+    // 確定按鈕
+    closeBtn.addEventListener('click', function () {
+      hideCard();
+    });
+
+    // 預設隱藏 -> 若你要預設顯示可以呼叫 showCard('123');
+    hideCard();
+  </script>
+</body>
+</html>
